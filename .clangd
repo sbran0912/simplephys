@@ -1,0 +1,18 @@
+# clangd-Konfiguration für simplephys
+# Der clangd-Sprachserver verwendet C++20 und findet die Projekt-Header
+# (inkl. raylib) in lib/header/ (entspricht CPPFLAGS += -Ilib/header).
+#
+# Hinweis: clangd loest relative Pfade in CompileFlags.Add nicht relativ zu
+# dieser Datei auf, daher wird der Include-Pfad absolut angegeben.
+CompileFlags:
+  Add:
+    - -std=c++20
+    - -I/home/stefan/coding/gcc/rayl/simplephys/lib/header
+
+# physics.hpp ist ein bewusster Umbrella-Header. Der Include Cleaner wuerde ihn
+# sonst als "nicht direkt genutzt" melden, weil die verwendeten Symbole aus
+# den eingebundenen Einzel-Headern stammen.
+Diagnostics:
+  Includes:
+    IgnoreHeader:
+      - physics.hpp
