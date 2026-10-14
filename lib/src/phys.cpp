@@ -20,11 +20,22 @@
 namespace {
 
 using std::vector;
+using std::numeric_limits;
+using std::pair;
+using std::pow;
+using std::abs;
+using std::min;
+using std::max;
+using std::sqrt;
+using std::visit;
+using std::decay_t;
+using std::is_same_v;
+using std::swap;
 
-constexpr float kInfinite = std::numeric_limits<float>::max();
+constexpr float kInfinite = numeric_limits<float>::max();
 
 // Projektionsbereich eines Polygons auf einer Achse.
-std::pair<float, float> ProjectPolygon(const vector<Vector2>& vertices, Vector2 axis) {
+pair<float, float> ProjectPolygon(const vector<Vector2>& vertices, Vector2 axis) {
     if (vertices.empty()) {
         return {0.0f, 0.0f};
     }
@@ -94,7 +105,7 @@ vector<Vector2> FindContactPoints(const vector<Vector2>& verticesA,
 }
 
 // Referenzkante fuer die Kontaktpunktberechnung.
-std::pair<Vector2, Vector2> FindReferenceEdge(const vector<Vector2>& vertices, Vector2 normal) {
+pair<Vector2, Vector2> FindReferenceEdge(const vector<Vector2>& vertices, Vector2 normal) {
     float bestDot = -kInfinite;
     Vector2 p1{};
     Vector2 p2{};
@@ -260,8 +271,8 @@ float CalculatePolyImpulse(const Polygon& polyA, const Polygon& polyB, Vector2 m
         mtv, Vector2Scale(mtv, (1.0f / polyA.Basic.Mass + 1.0f / polyB.Basic.Mass)));
 
     const float jDivAngular =
-        static_cast<float>(std::pow(Vector2DotProduct(rAP_perp, mtv), 2.0)) / polyA.Basic.Inertia +
-        static_cast<float>(std::pow(Vector2DotProduct(rBP_perp, mtv), 2.0)) / polyB.Basic.Inertia;
+        static_cast<float>(pow(Vector2DotProduct(rAP_perp, mtv), 2.0)) / polyA.Basic.Inertia +
+        static_cast<float>(pow(Vector2DotProduct(rBP_perp, mtv), 2.0)) / polyB.Basic.Inertia;
 
     return jDenominator / (jDivLinear + jDivAngular);
 }
@@ -275,7 +286,7 @@ float CalculateCirclePolyImpulse(const Polygon& poly, const Circle& circle, Vect
 
     // nur fuer box
     const float jDivAngular =
-        static_cast<float>(std::pow(Vector2DotProduct(rAP_perp, mtv), 2.0)) / poly.Basic.Inertia;
+        static_cast<float>(pow(Vector2DotProduct(rAP_perp, mtv), 2.0)) / poly.Basic.Inertia;
 
     return jDenominator / (jDivLinear + jDivAngular);
 }
@@ -406,7 +417,7 @@ bool IsCircleGrounded(float circleAngVelocity, Vector2 velocity_AB, Vector2 mtv)
         return false;
     }
 
-    if (std::abs(circleAngVelocity) > 0.1f) {
+    if (abs(circleAngVelocity) > 0.1f) {
         return false;
     }
 
@@ -492,7 +503,7 @@ CollisionResult DetectCollision(const Polygon& polyA, const Polygon& polyB) {
         const auto [minA, maxA] = ProjectPolygon(polyA.Vertices, axis);
         const auto [minB, maxB] = ProjectPolygon(polyB.Vertices, axis);
 
-        const float overlap = std::min(maxA, maxB) - std::max(minA, minB);
+        const float overlap = min(maxA, maxB) - max(minA, minB);
         if (overlap <= 0.0f) {
             return CollisionResult{};
         }
@@ -583,7 +594,7 @@ CollisionResult DetectCollision(const Polygon& poly, const Circle& circle) {
             }
             overlap = minOverlap;
         } else {
-            const float dist = std::sqrt(closestDistSq);
+            const float dist = sqrt(closestDistSq);
             overlap = circle.Radius - dist;
             if (dist > 1e-6f) {
                 axis = Vector2Scale(Vector2Subtract(circle.Basic.Location, closestPoint), 1.0f / dist);
@@ -618,15 +629,15 @@ CollisionResult DetectCollision(const Circle& circleA, const Circle& circleB) {
 }
 
 CollisionResult DetectCollision(const Shape& a, const Shape& b) {
-    return std::visit(
+    return visit(
         [](const auto& shapeA, const auto& shapeB) -> CollisionResult {
-            using A = std::decay_t<decltype(shapeA)>;
-            using B = std::decay_t<decltype(shapeB)>;
-            if constexpr (std::is_same_v<A, Polygon> && std::is_same_v<B, Polygon>) {
+            using A = decay_t<decltype(shapeA)>;
+            using B = decay_t<decltype(shapeB)>;
+            if constexpr (is_same_v<A, Polygon> && is_same_v<B, Polygon>) {
                 return DetectCollision(shapeA, shapeB);
-            } else if constexpr (std::is_same_v<A, Polygon> && std::is_same_v<B, Circle>) {
+            } else if constexpr (is_same_v<A, Polygon> && is_same_v<B, Circle>) {
                 return DetectCollision(shapeA, shapeB);
-            } else if constexpr (std::is_same_v<A, Circle> && std::is_same_v<B, Polygon>) {
+            } else if constexpr (is_same_v<A, Circle> && is_same_v<B, Polygon>) {
                 return DetectCollision(shapeB, shapeA);
             } else {
                 return DetectCollision(shapeA, shapeB);
@@ -759,18 +770,18 @@ CollisionForces ResolveCollision(Circle& circleA, Circle& circleB, Vector2 mtv) 
 }
 
 CollisionForces ResolveCollision(Shape& a, Shape& b, const vector<Vector2>& contacts, Vector2 mtv) {
-    return std::visit(
+    return visit(
         [&](auto& shapeA, auto& shapeB) -> CollisionForces {
-            using A = std::decay_t<decltype(shapeA)>;
-            using B = std::decay_t<decltype(shapeB)>;
-            if constexpr (std::is_same_v<A, Polygon> && std::is_same_v<B, Polygon>) {
+            using A = decay_t<decltype(shapeA)>;
+            using B = decay_t<decltype(shapeB)>;
+            if constexpr (is_same_v<A, Polygon> && is_same_v<B, Polygon>) {
                 return ResolveCollision(shapeA, shapeB, contacts, mtv);
-            } else if constexpr (std::is_same_v<A, Polygon> && std::is_same_v<B, Circle>) {
+            } else if constexpr (is_same_v<A, Polygon> && is_same_v<B, Circle>) {
                 return ResolveCollision(shapeA, shapeB, contacts, mtv);
-            } else if constexpr (std::is_same_v<A, Circle> && std::is_same_v<B, Polygon>) {
+            } else if constexpr (is_same_v<A, Circle> && is_same_v<B, Polygon>) {
                 CollisionForces forces = ResolveCollision(shapeB, shapeA, contacts, mtv);
-                std::swap(forces.ForceA, forces.ForceB);
-                std::swap(forces.AngForceA, forces.AngForceB);
+                swap(forces.ForceA, forces.ForceB);
+                swap(forces.AngForceA, forces.AngForceB);
                 return forces;
             } else {
                 return ResolveCollision(shapeA, shapeB, mtv);

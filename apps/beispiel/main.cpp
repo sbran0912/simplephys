@@ -19,8 +19,8 @@ using std::vector;
 // ====================================================================
 
 int main(int argc, char** argv) {
-    const int screenWidth = 1400;
-    const int screenHeight = 700;
+    const int screenWidth = 2800;
+    const int screenHeight = 1400;
 
     bool fullscreen = false;
     for (int i = 1; i < argc; ++i) {
@@ -37,16 +37,16 @@ int main(int argc, char** argv) {
     vector<Shape> shapes;
 
     // Boden (unbeweglich).
-    shapes.push_back(CreatePolygon(350, 500, 1000, 50, true));
+    shapes.push_back(CreatePolygon(700, 1000, 2000, 100, true));
 
     // Mauer aus 4 gestapelten Bloecken mit zufaelliger Breite und Hoehe.
-    const float baseX = 800.0f;
-    const float baseY = 500.0f;
+    const float baseX = 1600.0f;
+    const float baseY = 1000.0f;
     float currentY = baseY;
 
     for (int i = 0; i < 4; ++i) {
-        const float blockW = 60.0f + RandomFloat(0.0f, 40.0f);
-        const float blockH = 35.0f + RandomFloat(0.0f, 35.0f);
+        const float blockW = 120.0f + RandomFloat(0.0f, 80.0f);
+        const float blockH = 70.0f + RandomFloat(0.0f, 70.0f);
         const float blockX = baseX - blockW / 2.0f;
 
         shapes.push_back(CreatePolygon(blockX, currentY - blockH, blockW, blockH, false));
@@ -54,10 +54,10 @@ int main(int argc, char** argv) {
     }
 
     // Zwei Kreise mit einmaligem Impuls nach rechts.
-    Circle circle1 = CreateCircle(400, 400, 42, false);
-    Circle circle2 = CreateCircle(300, 300, 35, false);
-    circle1.ApplyForce(Vector2{10.0f, 0.0f}, 0.0f);
-    circle2.ApplyForce(Vector2{12.0f, 0.0f}, 0.0f);
+    Circle circle1 = CreateCircle(800, 800, 84, false);
+    Circle circle2 = CreateCircle(600, 600, 70, false);
+    circle1.ApplyForce(Vector2{20.0f, 0.0f}, 0.0f);
+    circle2.ApplyForce(Vector2{24.0f, 0.0f}, 0.0f);
     shapes.push_back(circle1);
     shapes.push_back(circle2);
 

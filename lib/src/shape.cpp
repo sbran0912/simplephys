@@ -9,9 +9,11 @@
 // ====================================================================
 
 namespace {
+using std::numeric_limits;
 // Unendliche Masse/Traegheit fuer Waende (entspricht math.MaxFloat32).
-constexpr float kInfinite = std::numeric_limits<float>::max();
+constexpr float kInfinite = numeric_limits<float>::max();
 } // namespace
+using std::visit;
 
 // --- Polygon --------------------------------------------------------
 
@@ -188,29 +190,29 @@ Circle CreateCircle(float x, float y, float r, bool wall) {
 // --- Dispatcher auf Shape -------------------------------------------
 
 void Update(Shape& shape) {
-    std::visit([](auto& s) { s.Update(); }, shape);
+    visit([](auto& s) { s.Update(); }, shape);
 }
 
 void Draw(const Shape& shape, Color color, float thickness) {
-    std::visit([&](const auto& s) { s.Draw(color, thickness); }, shape);
+    visit([&](const auto& s) { s.Draw(color, thickness); }, shape);
 }
 
 void Rotate(Shape& shape, float angle) {
-    std::visit([&](auto& s) { s.Rotate(angle); }, shape);
+    visit([&](auto& s) { s.Rotate(angle); }, shape);
 }
 
 void ApplyForce(Shape& shape, Vector2 force, float angForce) {
-    std::visit([&](auto& s) { s.ApplyForce(force, angForce); }, shape);
+    visit([&](auto& s) { s.ApplyForce(force, angForce); }, shape);
 }
 
 void ApplyGravity(Shape& shape, Vector2 gravity) {
-    std::visit([&](auto& s) { s.ApplyGravity(gravity); }, shape);
+    visit([&](auto& s) { s.ApplyGravity(gravity); }, shape);
 }
 
 void ResetPos(Shape& shape, Vector2 delta) {
-    std::visit([&](auto& s) { s.ResetPos(delta); }, shape);
+    visit([&](auto& s) { s.ResetPos(delta); }, shape);
 }
 
 void ClearState(Shape& shape) {
-    std::visit([](auto& s) { s.ClearState(); }, shape);
+    visit([](auto& s) { s.ClearState(); }, shape);
 }

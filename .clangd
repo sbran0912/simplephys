@@ -7,7 +7,7 @@
 CompileFlags:
   Add:
     - -std=c++20
-    - -I/home/stefan/coding/gcc/rayl/simplephys/lib/header
+    - -I/home/stefan/coding/rayl/simplephys/lib/header
 
 # physics.hpp ist ein bewusster Umbrella-Header. Der Include Cleaner wuerde ihn
 # sonst als "nicht direkt genutzt" melden, weil die verwendeten Symbole aus
